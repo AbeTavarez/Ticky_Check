@@ -24,7 +24,6 @@ with open('small.log') as file:
         # Checks for successful match
         if info is not None:
             e = info.group(0)
-            print(e)
             if not e in per_user:
                 per_user[e] = 1
             else:
@@ -39,5 +38,11 @@ with open('small.log') as file:
                 errors[e] += 1
 file.close()
 
-print('Erros Dict', errors)
-print('Per User Dict', per_user)
+
+# Sorted by Value (Most common to least common)
+print('ERRORS:', sorted(errors.items(),
+                        key=operator.itemgetter(1), reverse=True))
+
+# Sorted by username
+print('Per User Dict:', sorted(per_user.items(),
+                               key=operator.itemgetter(1), reverse=True))
