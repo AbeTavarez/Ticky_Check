@@ -14,16 +14,17 @@ per_user = {}  # Splitting between INFO and ERROR
 # Sample Error
 # "May 27 11:45:40 ubuntu.local ticky: INFO: Created ticket [#1234] (username)"
 
-with open('syslog.log') as file:
+with open('small.log') as file:
     # read each line
     for line in file.readlines():
         # regex search
-        info = re.search(r'INFO: ([\w]*)', line)
-        error = re.search(r'ERROR: ([\w]*)', line)
+        info = re.search(r'INFO: ([\w].*)', line)
+        error = re.search(r'ERROR: ([\w].*)', line)
 
         # Checks for successful match
         if info is not None:
             e = info.group(0)
+            print(e)
             if not e in per_user:
                 per_user[e] = 1
             else:
@@ -38,5 +39,5 @@ with open('syslog.log') as file:
                 errors[e] += 1
 file.close()
 
-print(errors)
-print(per_user)
+print('Erros Dict', errors)
+print('Per User Dict', per_user)
