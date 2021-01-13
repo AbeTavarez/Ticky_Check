@@ -9,14 +9,13 @@ per_user = {}  # Splitting between INFO and ERROR
 # Dict: Number of different error messages
 errors = {}
 
-# Sample Error
-# "May 27 11:45:40 ubuntu.local ticky: INFO: Created ticket [#1234] (username)"
-
 # * Read file and create dictionaries
 with open('small.log') as file:
     # read each line
     for line in file.readlines():
         # regex search
+        # Sample Error
+        # "May 27 11:45:40 ubuntu.local ticky: INFO: Created ticket [#1234] (username)"
         match = re.search(
             r'ticky: ([\w+]*):? ([\w ]*) [\[[0-9#]*\]?]? ?\((.*)\)$', line)
         code, error_msg, user = match.group(1), match.group(2), match.group(3)
@@ -27,8 +26,8 @@ with open('small.log') as file:
 
         if user not in per_user.keys():
             per_user[user] = {}
-            per_user[user]['INFO'] = 0
-            per_user[user]['ERROR'] = 0
+            per_user[user]['INFO'] = 1
+            per_user[user]['ERROR'] = 1
 
         if code == 'INFO':
             per_user[user]["INFO"] += 1
