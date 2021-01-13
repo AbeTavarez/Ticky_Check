@@ -16,6 +16,7 @@ errors = {}
 # Sample Error
 # "May 27 11:45:40 ubuntu.local ticky: INFO: Created ticket [#1234] (username)"
 
+# * Read file and create dictionaries
 with open('small.log') as file:
     # read each line
     for line in file.readlines():
@@ -26,7 +27,7 @@ with open('small.log') as file:
 
         # Checks for successful match
         if info is not None:
-            i = info.group(0)
+            # i = info.group(0)
             u = user.group(0)
             if not u in per_user_info:
                 per_user_info[u] = 1
@@ -35,7 +36,7 @@ with open('small.log') as file:
 
         # Checks for ERROR match
         if error is not None:
-            e = error.group(0)
+            # e = error.group(0)
             u = user.group(0)
             if not u in per_user_error:
                 per_user_error[u] = 1
@@ -51,6 +52,12 @@ with open('small.log') as file:
                 errors[e] += 1
 file.close()
 
+# * Create CSV files
+with open('user_statistics.csv', 'w', newline='') as user_csv:
+    columns = ['Username', 'INFO', 'ERROR']
+    writer = csv.DictWriter(user_csv, fieldnames=columns)
+    writer.writeheader()
+user_csv.close()
 
 # Sorted by VALUE (Most common to least common)
 print('ERRORS:', sorted(errors.items(),
