@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
-
-import os
 import sys
 import re
 import operator
 import csv
 
 # Dict: Count number of entries for each user
-per_user_info = {}  # Splitting between INFO and ERROR
-per_user_error = {}  # Splitting between INFO and ERROR
-
+per_user = {}  # Splitting between INFO and ERROR
 # Dict: Number of different error messages
 errors = {}
 
@@ -21,48 +17,41 @@ with open('small.log') as file:
     # read each line
     for line in file.readlines():
         # regex search
-        info = re.search(r'INFO: ([\w].*)', line)
-        user = re.search(r'\(.*?\)', line)
-        error = re.search(r'ERROR: ([\w].*)', line)
+        match = re.search(
+            r'ticky: ([\w+]*):? ([\w ]*) [\[[0-9#]*\]?]? ?\((.*)\)$', line)
+        code, error_msg, user = match.group(1), match.group(2), match.group(3)
+        if error_msg not in errors.keys():
+            errors[error_msg] = 1
+        else:
+            errors[error_msg] += 1
 
-        # Checks for successful match
-        if info is not None:
-            # i = info.group(0)
-            u = user.group(0)
-            if not u in per_user_info:
-                per_user_info[u] = 1
-            else:
-                per_user_info[u] += 1
+        if user not in per_user.keys():
+            per_user[user] = {}
+            per_user[user]['INFO'] = 0
+            per_user[user]['ERROR'] = 0
 
-        # Checks for ERROR match
-        if error is not None:
-            # e = error.group(0)
-            u = user.group(0)
-            if not u in per_user_error:
-                per_user_error[u] = 1
-            else:
-                per_user_error[u] += 1
+        if code == 'INFO':
+            per_user[user]["INFO"] += 1
+        elif code == 'ERROR':
+            per_user[user]['ERROR'] += 1
 
-        # Checks if error got a match
-        if error is not None:
-            e = error.group(0)
-            if not e in errors:
-                errors[e] = 1
-            else:
-                errors[e] += 1
+
+# Sorted by VALUE (Most common to least common)
+errors_list = sorted(errors.items(), key=operator.itemgetter(1), reverse=True)
+
+# Sorted by USERNAME
+per_user_list = sorted(per_user.items(), key=operator.itemgetter(0))
+
 file.close()
+# Insert at the beginning of the list
+errors_list.insert(0, ('Error', 'Count'))
 
 # * Create CSV files
 with open('user_statistics.csv', 'w', newline='') as user_csv:
-    columns = ['Username', 'INFO', 'ERROR']
-    writer = csv.DictWriter(user_csv, fieldnames=columns)
-    writer.writeheader()
+    for key, value in per_user_list:
+        user_csv.write(str(key) + ',' +
+                       str(value['INFO']) + ',' + str(value['ERROR'])+'\n')
 user_csv.close()
-
-# Sorted by VALUE (Most common to least common)
-print('ERRORS:', sorted(errors.items(),
-                        key=operator.itemgetter(1), reverse=True))
-
-# Sorted by USERNAME
-print('Per User INFO:', sorted(per_user_info.items(), key=operator.itemgetter(0)))
-print('Per User ERROR:', sorted(per_user_error.items(), key=operator.itemgetter(0)))
+with open('error_message.csv', 'w', newline='') as error_csv:
+    for key, value in errors_list:
+        error_csv.write(str(key) + ' ' + str(value))
